@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIA × CaseTracking — Casos de Uso</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lime: #C9F53B;
+  --lime-dark: #A8D420;
+  --bg: #0A0B0D;
+  --bg2: #111318;
+  --bg3: #181C22;
+  --bg4: #1E2330;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(201,245,59,0.3);
+  --text: #FFFFFF;
+  --text-muted: #8B8FA8;
+  --text-dim: #545870;
+  --green-ct: #00C896;
+  --blue-ct: #1A237E;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,11,13,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: 64px; display: flex; align-items: center;
+  padding: 0 48px; justify-content: space-between;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--lime); display: flex; align-items: center; justify-content: center;
+}
+.nav-logo-mark svg { width: 18px; height: 18px; }
+.nav-logo-text { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+.nav-logo-sub { font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+.nav-badge {
+  font-size: 11px; font-weight: 600; background: rgba(201,245,59,0.12);
+  color: var(--lime); border: 1px solid rgba(201,245,59,0.25);
+  border-radius: 100px; padding: 4px 12px;
+}
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; text-decoration: none; transition: color 0.15s; }
+.nav-link:hover { color: var(--text); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 120px 48px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 800px 600px at 70% 40%, rgba(201,245,59,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 400px at 20% 80%, rgba(0,200,150,0.05) 0%, transparent 60%);
+}
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+}
+.hero-content { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(201,245,59,0.08); border: 1px solid rgba(201,245,59,0.2);
+  border-radius: 100px; padding: 6px 16px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--lime); margin-bottom: 32px;
+}
+.hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 {
+  font-size: clamp(40px, 6vw, 72px); font-weight: 900;
+  line-height: 1.05; letter-spacing: -0.03em;
+  color: var(--text); margin-bottom: 24px;
+}
+.hero h1 .lime { color: var(--lime); }
+.hero h1 .dim { color: var(--text-muted); font-weight: 400; }
+.hero-desc {
+  font-size: 18px; color: var(--text-muted); line-height: 1.7;
+  max-width: 580px; margin-bottom: 48px; font-weight: 400;
+}
+.hero-desc strong { color: var(--text); font-weight: 600; }
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 64px; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--lime); color: #0A0B0D;
+  padding: 14px 28px; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; transition: all 0.2s; text-decoration: none;
+}
+.btn-primary:hover { background: var(--lime-dark); transform: translateY(-1px); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--text);
+  padding: 14px 28px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); transition: all 0.2s; text-decoration: none;
+}
+.btn-secondary:hover { border-color: var(--border-hover); color: var(--lime); }
+
+/* Hero stats */
+.hero-stats { display: flex; gap: 48px; flex-wrap: wrap; }
+.stat-item { }
+.stat-num { font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.stat-num span { color: var(--lime); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── FOCUS SECTION ── */
+.focus-section { padding: 80px 48px; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.focus-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.focus-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lime); margin-bottom: 16px; }
+.focus-inner h2 { font-size: clamp(28px, 3.5vw, 42px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 20px; }
+.focus-inner p { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
+.focus-inner strong { color: var(--text); }
+
+.why-cards { display: flex; flex-direction: column; gap: 12px; }
+.why-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+  display: flex; align-items: flex-start; gap: 16px;
+  transition: border-color 0.2s;
+}
+.why-card:hover { border-color: var(--border-hover); }
+.why-num {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(201,245,59,0.1); border: 1px solid rgba(201,245,59,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--lime); flex-shrink: 0;
+}
+.why-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.why-desc { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
+/* ── USE CASES SECTION ── */
+.cases-section { padding: 100px 48px; }
+.section-header { max-width: 1200px; margin: 0 auto 64px; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lime); margin-bottom: 16px; }
+.section-header h2 { font-size: clamp(28px, 3.5vw, 48px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 16px; }
+.section-header p { font-size: 16px; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
+
+/* Case cards grid */
+.cases-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+.case-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  transition: all 0.25s; cursor: pointer;
+  display: flex; flex-direction: column;
+  text-decoration: none;
+}
+.case-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,245,59,0.1);
+}
+
+.case-card-top {
+  padding: 28px 28px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.case-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.case-milestone {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-dim);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 100px; padding: 4px 10px;
+}
+
+.case-card-body { padding: 20px 28px 24px; flex: 1; display: flex; flex-direction: column; }
+.case-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; line-height: 1.3; }
+.case-analogy {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--lime); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.case-analogy::before { content: ''; display: block; width: 16px; height: 1px; background: var(--lime); }
+.case-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 20px; flex: 1; }
+.case-desc strong { color: var(--text); font-weight: 600; }
+
+.case-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.case-tag {
+  font-size: 11px; font-weight: 500;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text-muted); border-radius: 6px; padding: 3px 10px;
+}
+
+.case-card-footer {
+  padding: 16px 28px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.case-link {
+  font-size: 13px; font-weight: 600; color: var(--lime);
+  display: flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+.case-link svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.case-card:hover .case-link svg { transform: translateX(3px); }
+.case-q { font-size: 11px; color: var(--text-dim); }
+
+/* ── MOAT SECTION ── */
+.moat-section {
+  padding: 100px 48px;
+  background: var(--bg2); border-top: 1px solid var(--border);
+}
+.moat-inner { max-width: 1200px; margin: 0 auto; }
+.moat-inner h2 { font-size: clamp(28px, 3.5vw, 48px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.1; }
+.moat-inner h2 .lime { color: var(--lime); }
+.moat-sub { font-size: 16px; color: var(--text-muted); max-width: 560px; line-height: 1.7; margin-bottom: 56px; }
+
+.moat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; }
+.moat-cell { background: var(--bg2); padding: 32px; }
+.moat-cell-icon { font-size: 28px; margin-bottom: 16px; }
+.moat-cell-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.moat-cell-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.moat-cell-stat { margin-top: 16px; font-size: 12px; font-weight: 600; color: var(--lime); }
+
+/* ── CTA FINAL ── */
+.cta-section {
+  padding: 100px 48px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 700px 500px at 50% 50%, rgba(201,245,59,0.06) 0%, transparent 70%);
+}
+.cta-section h2 { font-size: clamp(28px, 3.5vw, 52px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.1; position: relative; }
+.cta-section h2 .lime { color: var(--lime); }
+.cta-section p { font-size: 16px; color: var(--text-muted); max-width: 480px; margin: 0 auto 40px; line-height: 1.7; position: relative; }
+.cta-section .btn-primary { font-size: 16px; padding: 16px 36px; position: relative; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 48px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo { display: flex; align-items: center; gap: 10px; }
+.footer-logo-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--lime); display: flex; align-items: center; justify-content: center; }
+.footer-logo-mark svg { width: 14px; height: 14px; }
+.footer-text { font-size: 13px; font-weight: 600; color: var(--text); }
+.footer-note { font-size: 12px; color: var(--text-dim); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .focus-inner { grid-template-columns: 1fr; gap: 40px; }
+  .cases-section, .moat-section, .cta-section { padding: 60px 24px; }
+  .cases-grid { grid-template-columns: 1fr 1fr; }
+  .moat-grid { grid-template-columns: 1fr; }
+  footer { padding: 24px; flex-direction: column; gap: 12px; text-align: center; }
+}
+@media (max-width: 600px) {
+  .cases-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 28px; }
+  nav .nav-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0A0B0D" stroke-width="3"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+    </div>
+    <span class="nav-logo-text">LemonTech</span>
+    <span class="nav-logo-sub">/ LIA Partner</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">Documento interno · H2 2026</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      LIA Partner × CaseTracking · Casos de Uso H2 2026
+    </div>
+    <h1>
+      La IA que vive<br>
+      <span class="lime">dentro de tus causas</span><br>
+      <span class="dim">— no al lado de ellas.</span>
+    </h1>
+    <p class="hero-desc">
+      Seis casos de uso que transforman CaseTracking de un <strong>registrador de datos</strong> en un <strong>motor de inteligencia procesal</strong>. Todos construidos sobre el único activo que ningún competidor puede replicar.
+    </p>
+    <div class="hero-cta">
+      <a href="#cases" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+        Ver los 6 casos de uso
+      </a>
+      <a href="#por-que" class="btn-secondary">¿Por qué CaseTracking?</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">27<span>K+</span></div>
+        <div class="stat-label">usuarios activos en LATAM</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">700<span>K</span></div>
+        <div class="stat-label">causas procesadas/día</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">18<span>+</span></div>
+        <div class="stat-label">países con presencia</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0</div>
+        <div class="stat-label">competidores con este dataset</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOCUS: POR QUÉ CASETRACKING -->
+<section class="focus-section" id="por-que">
+  <div class="focus-inner">
+    <div>
+      <div class="focus-label">El enfoque estratégico</div>
+      <h2>¿Por qué empezar por CaseTracking?</h2>
+      <p>LIA podría integrarse con cualquier parte del ecosistema Lemontech. Elegimos CaseTracking Firms como punto de entrada estratégico en H2 2026 por tres razones concretas.</p>
+      <p>La integración con CTF no es una feature — es el <strong>prerequisito para construir el moat</strong>. Sin los datos de causas reales, LIA es un chatbot legal más. Con ellos, es el único producto en el mercado que puede hacer lo que mostramos en estos casos de uso.</p>
+    </div>
+    <div class="why-cards">
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <div>
+          <div class="why-title">El ICP más valioso ya está ahí</div>
+          <div class="why-desc">Los usuarios de CaseTracking Firms son abogados litigantes en firmas medianas con volumen alto de causas — exactamente el perfil con mayor disposición a pagar por inteligencia procesal.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <div>
+          <div class="why-title">Los datos que construyen el moat</div>
+          <div class="why-desc">700K causas/día con movimientos, juzgados, etapas y resoluciones reales. Ese dataset histórico hace posible Win Probability y Anomaly Detection. Ningún competidor puede replicarlo.</div>
+        </div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <div>
+          <div class="why-title">El puente hacia el Legal OS</div>
+          <div class="why-desc">La visión de LIA como sistema operativo del abogado requiere que LIA viva dentro del flujo de trabajo real. CTF es donde ese flujo ocurre. Esta integración es el primer paso concreto.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="cases-section" id="cases">
+  <div class="section-header">
+    <div class="section-label">Los 6 casos de uso</div>
+    <h2>De registrar datos<br>a generar inteligencia</h2>
+    <p>Cada caso de uso está acompañado de un demo interactivo que simula la experiencia real dentro de CaseTracking. Haz click para explorar.</p>
+  </div>
+
+  <div class="cases-grid">
+
+    <!-- M3: Morning Briefing -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_AppDemo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(201,245,59,0.1);border:1px solid rgba(201,245,59,0.2);">☀️</div>
+        <div class="case-milestone">Milestone 3</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Morning Briefing</div>
+        <div class="case-analogy">Como Bloomberg Terminal</div>
+        <div class="case-desc">
+          El abogado empieza el día con un resumen de todos los movimientos judiciales de sus causas, <strong>ordenado por urgencia</strong>, con el contexto legal necesario para actuar — sin abrir CTF, sin buscar nada.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Inicio CTF</span>
+          <span class="case-tag">Datos: Movimientos + Etapas</span>
+          <span class="case-tag">Output: Briefing + Acciones</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q3 2026</span>
+      </div>
+    </a>
+
+    <!-- M4: Impulso Procesal -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_ImpulsoProcesal_Demo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.2);">🧭</div>
+        <div class="case-milestone">Milestone 4</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Impulso Procesal</div>
+        <div class="case-analogy">Como Waze para el derecho</div>
+        <div class="case-desc">
+          LIA no solo dice qué pasó en la causa — dice <strong>qué hacer ahora</strong>, con el plazo exacto según el CPC, el artículo legal correspondiente, y el borrador listo para ejecutar.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Detalle causa CTF</span>
+          <span class="case-tag">Datos: Etapa + Materia + Juzgado</span>
+          <span class="case-tag">Output: Pasos + Plazos + Borrador</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q3–Q4 2026</span>
+      </div>
+    </a>
+
+    <!-- M5: Legal Workflows -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_Workflows_Demo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.25);">⚡</div>
+        <div class="case-milestone">Milestone 5</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Legal Workflows</div>
+        <div class="case-analogy">Como Gmail + Zapier</div>
+        <div class="case-desc">
+          La firma define reglas una vez y LIA las ejecuta siempre: <strong>si llega un movimiento de tipo X, hacer Y automáticamente</strong>. Tareas creadas solas, borradores generados, alertas enviadas.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Configuración CTF</span>
+          <span class="case-tag">Datos: Movimientos en tiempo real</span>
+          <span class="case-tag">Output: Automatización total</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q4 2026</span>
+      </div>
+    </a>
+
+    <!-- M6a: Dual Timeline -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_DualTimeline_Demo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);">📊</div>
+        <div class="case-milestone">Milestone 6a</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Dual Timeline</div>
+        <div class="case-analogy">Como Epic en medicina</div>
+        <div class="case-desc">
+          Dos líneas de tiempo superpuestas: lo que pasó realmente en la causa vs. <strong>lo que el proceso debería haber seguido</strong>. Las brechas se muestran en días con su implicancia de riesgo.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Detalle causa CTF</span>
+          <span class="case-tag">Datos: Historial + Benchmark juzgado</span>
+          <span class="case-tag">Output: Gap procesal + Riesgo</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q4 2026</span>
+      </div>
+    </a>
+
+    <!-- M6b: Win Probability -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_WinProbability_Demo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);">🎯</div>
+        <div class="case-milestone">Milestone 6b</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Win Probability</div>
+        <div class="case-analogy">Como el underwriting de seguros</div>
+        <div class="case-desc">
+          Un modelo de riesgo basado en <strong>847+ causas similares históricas</strong> que calcula la probabilidad de éxito judicial — el análisis que los grandes estudios cobran como consultoría estratégica.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Detalle causa CTF</span>
+          <span class="case-tag">Datos: 700K causas históricas</span>
+          <span class="case-tag">Output: % éxito + Estrategia</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q4 2026</span>
+      </div>
+    </a>
+
+    <!-- M6c: Anomaly Detection -->
+    <a class="case-card" href="https://ssanchez-sergio.github.io/liatest2/LIA_AnomalyDetection_Demo.html" target="_blank">
+      <div class="case-card-top">
+        <div class="case-icon" style="background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.2);">🔬</div>
+        <div class="case-milestone">Milestone 6c</div>
+      </div>
+      <div class="case-card-body">
+        <div class="case-title">Anomaly Detection</div>
+        <div class="case-analogy">Como Stripe Radar</div>
+        <div class="case-desc">
+          LIA detecta patrones inusuales que el abogado nunca buscaría: una causa que progresa 3x más lento que el promedio del juzgado, un <strong>juez con comportamiento atípico esta semana</strong>.
+        </div>
+        <div class="case-tags">
+          <span class="case-tag">Pantalla: Lista causas CTF</span>
+          <span class="case-tag">Datos: Patrones históricos agregados</span>
+          <span class="case-tag">Output: Alertas + Intel táctica</span>
+        </div>
+      </div>
+      <div class="case-card-footer">
+        <span class="case-link">
+          Ver demo interactivo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+        <span class="case-q">Q4 2026</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- MOAT -->
+<section class="moat-section">
+  <div class="moat-inner">
+    <div class="section-label">Por qué nadie más puede hacer esto</div>
+    <h2>El moat que construimos<br>con cada <span class="lime">caso de uso</span></h2>
+    <p class="moat-sub">Estos no son features que cualquier startup de IA legal puede replicar. Cada uno depende de datos que solo Lemontech tiene.</p>
+    <div class="moat-grid">
+      <div class="moat-cell">
+        <div class="moat-cell-icon">🏗️</div>
+        <div class="moat-cell-title">Datos operacionales únicos</div>
+        <div class="moat-cell-desc">Harvey y Magnar tienen modelos. Nosotros tenemos los datos reales: movimientos, plazos, resoluciones, horas, clientes. Sin esos datos, los casos de uso más poderosos son imposibles.</div>
+        <div class="moat-cell-stat">700K causas/día · 18+ países</div>
+      </div>
+      <div class="moat-cell">
+        <div class="moat-cell-icon">🔒</div>
+        <div class="moat-cell-title">Switching cost operacional</div>
+        <div class="moat-cell-desc">Una firma que configura sus Legal Workflows, calibra sus modelos de Win Probability y entrena sus anomalías no puede migrar a otro producto sin perder toda esa inteligencia acumulada.</div>
+        <div class="moat-cell-stat">Lock-in más valioso del mercado legal</div>
+      </div>
+      <div class="moat-cell">
+        <div class="moat-cell-icon">📈</div>
+        <div class="moat-cell-title">El modelo mejora con el uso</div>
+        <div class="moat-cell-desc">Cada causa que se procesa, cada workflow que se ejecuta, cada anomalía que se confirma — calibra el modelo. El producto se vuelve más inteligente para cada firma a medida que lo usa.</div>
+        <div class="moat-cell-stat">Ventaja compuesta en el tiempo</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="section-label" style="display:inline-block;margin-bottom:20px;">Para el equipo de producto</div>
+  <h2>¿Listos para construir<br>el <span class="lime">Legal OS de LATAM</span>?</h2>
+  <p>Estos demos son el punto de partida. El siguiente paso es validar los casos de uso con usuarios reales de CaseTracking antes de comprometer capacidad de desarrollo.</p>
+  <a href="https://ssanchez-sergio.github.io/liatest2/LIA_AppDemo.html" target="_blank" class="btn-primary">
+    Empezar con Morning Briefing →
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="footer-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0A0B0D" stroke-width="3"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+    </div>
+    <span class="footer-text">LemonTech · LIA Partner</span>
+  </div>
+  <div class="footer-note">Documento interno H2 2026 · No distribuir externamente</div>
+</footer>
+
+</body>
+</html>
