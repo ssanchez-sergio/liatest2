@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaseTracking Firms + LIA · Legal Workflows</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #F0F2F5; min-height: 100vh; overflow-x: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+.ct-nav { background: #1A237E; height: 48px; display: flex; align-items: center; padding: 0 20px; gap: 0; z-index: 10; position: relative; flex-shrink: 0; }
+.ct-logo { display: flex; align-items: center; gap: 8px; margin-right: 24px; }
+.ct-logo-icon { width: 28px; height: 28px; border-radius: 6px; background: #fff; display: flex; align-items: center; justify-content: center; }
+.ct-logo-icon svg { width: 18px; height: 18px; }
+.ct-logo-text { font-size: 13px; font-weight: 700; color: #fff; }
+.ct-logo-badge { font-size: 9px; background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 3px; }
+.ct-nav-link { font-size: 13px; color: rgba(255,255,255,0.65); padding: 0 14px; height: 48px; display: flex; align-items: center; gap: 6px; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+.ct-nav-link.active { color: #fff; border-bottom-color: #fff; }
+.ct-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.ct-avatar { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; }
+
+.ct-body { display: flex; flex: 1; overflow: hidden; }
+.ct-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: #1C1C1E; }
+.page-subtitle { font-size: 13px; color: #6B7280; margin-top: 2px; }
+.btn-new { display: flex; align-items: center; gap: 6px; padding: 9px 16px; background: #1A237E; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+/* Config sections */
+.config-section { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+.config-section-header { padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; gap: 10px; }
+.config-section-title { font-size: 14px; font-weight: 600; color: #1C1C1E; }
+.config-section-body { padding: 16px 18px; }
+
+/* Notification rows */
+.notif-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #F9FAFB; }
+.notif-row:last-child { border-bottom: none; }
+.notif-info {}
+.notif-name { font-size: 13px; font-weight: 500; color: #1C1C1E; margin-bottom: 3px; }
+.notif-desc { font-size: 12px; color: #6B7280; }
+.notif-controls { display: flex; align-items: center; gap: 12px; }
+.time-select { font-size: 12px; border: 1px solid #E5E7EB; border-radius: 6px; padding: 5px 10px; color: #374151; background: #fff; }
+.toggle { width: 36px; height: 20px; border-radius: 100px; background: #1A237E; position: relative; cursor: pointer; flex-shrink: 0; }
+.toggle::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: #fff; right: 3px; top: 3px; }
+.toggle.off { background: #D1D5DB; }
+.toggle.off::after { left: 3px; right: auto; }
+
+/* Empty workflows state */
+.empty-workflows { padding: 48px 24px; text-align: center; }
+.empty-icon { font-size: 40px; opacity: 0.2; margin-bottom: 12px; }
+.empty-title { font-size: 14px; font-weight: 600; color: #1C1C1E; margin-bottom: 6px; }
+.empty-desc { font-size: 13px; color: #9CA3AF; line-height: 1.6; max-width: 340px; margin: 0 auto; }
+
+/* LIA Panel */
+.lia-panel { position: fixed; right: -440px; top: 48px; bottom: 0; width: 420px; background: #fff; border-left: 2px solid #00C896; z-index: 103; display: flex; flex-direction: column; transition: right 0.5s cubic-bezier(0.4,0,0.2,1); box-shadow: -8px 0 32px rgba(0,0,0,0.12); }
+.lia-panel.open { right: 0; }
+.lia-panel-header { background: linear-gradient(135deg, #0B3D2E 0%, #0F4F3A 100%); padding: 14px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.lia-pulse { width: 10px; height: 10px; border-radius: 50%; background: #00C896; box-shadow: 0 0 10px #00C896; animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 6px #00C896} 50%{box-shadow:0 0 16px #00C896} }
+.lia-header-name { font-size: 14px; font-weight: 700; color: #fff; }
+.lia-header-sub { font-size: 11px; color: rgba(255,255,255,0.5); }
+.lia-close { margin-left: auto; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 20px; line-height: 1; padding: 4px; }
+.lia-close:hover { color: #fff; }
+.lia-panel-body { flex: 1; overflow-y: auto; padding: 16px; background: #F9FAFB; }
+.lia-panel-input { padding: 12px 16px; border-top: 1px solid #E5E7EB; display: flex; gap: 8px; background: #fff; flex-shrink: 0; }
+.lia-input { flex: 1; padding: 9px 13px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 13px; color: #374151; font-family: 'Inter', sans-serif; }
+.lia-send { width: 36px; height: 36px; border-radius: 8px; background: #00C896; border: none; cursor: pointer; color: #fff; font-size: 16px; }
+
+.chat-msg { margin-bottom: 14px; }
+.chat-msg-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9CA3AF; margin-bottom: 4px; }
+.chat-bubble { padding: 11px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; color: #1C1C1E; border: 1px solid #E5E7EB; background: #fff; }
+.lia-bubble { background: #ECFDF5; border-color: rgba(0,200,150,0.25); border-radius: 2px 10px 10px 10px; }
+
+.typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+.typing span { width: 6px; height: 6px; border-radius: 50%; background: #00C896; animation: bounce 1.2s ease-in-out infinite; }
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* Workflow cards in LIA */
+.wf-card { background: #fff; border: 1px solid #E5E7EB; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.wf-card-header { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F3F4F6; }
+.wf-card-title { font-size: 12px; font-weight: 600; color: #1C1C1E; }
+.wf-active-badge { font-size: 10px; font-weight: 600; background: #ECFDF5; color: #065F46; border: 1px solid rgba(0,200,150,0.3); border-radius: 100px; padding: 2px 8px; }
+.wf-block { display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #F9FAFB; font-size: 11px; }
+.wf-block:last-child { border-bottom: none; }
+.wf-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+.wf-tag.trigger { background: #F5F3FF; color: #7C3AED; }
+.wf-tag.condition { background: #FFFBEB; color: #D97706; }
+.wf-tag.action { background: #ECFDF5; color: #065F46; }
+.wf-text { color: #374151; line-height: 1.5; }
+
+.wf-summary { background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 12px; color: #1A237E; }
+.wf-summary strong { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; color: #3730A3; }
+
+/* Overlay */
+.overlay-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0); z-index: 100; pointer-events: none; transition: background 0.4s ease; }
+.overlay-backdrop.active { background: rgba(0,0,0,0.55); pointer-events: all; }
+.spotlight { position: absolute; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); pointer-events: none; z-index: 101; transition: all 0.45s cubic-bezier(0.4,0,0.2,1); border: 2px solid rgba(255,255,255,0.2); }
+.spotlight.hidden { opacity: 0; }
+.tooltip { position: absolute; z-index: 102; width: 330px; background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06); transition: all 0.35s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+.tooltip.hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
+.tooltip-header { background: linear-gradient(135deg, #1A237E 0%, #283593 100%); padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+.tooltip-lia-dot { width: 8px; height: 8px; border-radius: 50%; background: #00C896; box-shadow: 0 0 8px #00C896; flex-shrink: 0; }
+.tooltip-step-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+.tooltip-title { font-size: 14px; font-weight: 600; color: #fff; }
+.tooltip-body { padding: 16px; }
+.tooltip-text { font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 16px; }
+.tooltip-text strong { color: #1A237E; }
+.tooltip-text .highlight { color: #EF4444; font-weight: 600; }
+.tooltip-text .good { color: #16A34A; font-weight: 600; }
+.tooltip-text .purple { color: #7C3AED; font-weight: 600; }
+.tooltip-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid #F3F4F6; background: #FAFAFA; }
+.tooltip-dots { display: flex; gap: 5px; }
+.tooltip-dot { width: 6px; height: 6px; border-radius: 50%; background: #E5E7EB; transition: all 0.2s; }
+.tooltip-dot.active { background: #00C896; width: 18px; border-radius: 3px; }
+.tooltip-dot.done { background: #A7F3D0; }
+.tooltip-btn { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.tooltip-btn.primary { background: #00C896; color: #fff; }
+.tooltip-btn.primary:hover { background: #00A87E; }
+.tooltip-btn.skip { background: transparent; color: #9CA3AF; font-weight: 400; font-size: 12px; padding: 8px 0; }
+
+.tour-trigger { position: fixed; bottom: 28px; right: 28px; z-index: 200; background: linear-gradient(135deg, #00C896 0%, #00A87E 100%); color: #fff; border: none; border-radius: 100px; padding: 13px 22px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 20px rgba(0,200,150,0.4); display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+.tour-trigger:hover { transform: translateY(-2px); }
+.tour-trigger.hidden { opacity: 0; pointer-events: none; }
+.restart-btn { position: fixed; bottom: 28px; right: 28px; z-index: 200; display: none; background: #fff; color: #1A237E; border: 1.5px solid #E5E7EB; border-radius: 100px; padding: 11px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="ct-nav">
+    <div class="ct-logo">
+      <div class="ct-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1A237E" stroke-width="2.5"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div>
+      <span class="ct-logo-text">CaseTracking</span>
+      <span class="ct-logo-badge">Firms</span>
+    </div>
+    <div class="ct-nav-link">Inicio</div>
+    <div class="ct-nav-link">Causas</div>
+    <div class="ct-nav-link">Clientes</div>
+    <div class="ct-nav-link active">Configuración</div>
+    <div class="ct-nav-right"><div class="ct-avatar">IA</div></div>
+  </nav>
+
+  <div class="ct-body">
+    <div class="ct-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Configuración</div>
+          <div class="page-subtitle">Notificaciones y preferencias de la cuenta</div>
+        </div>
+      </div>
+
+      <!-- Notificaciones section -->
+      <div class="config-section" id="notif-section">
+        <div class="config-section-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="config-section-title">Notificaciones</span>
+        </div>
+        <div class="config-section-body">
+          <div style="font-size:12px;color:#6B7280;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px;margin-bottom:12px;">
+            ℹ️ La búsqueda de movimientos desde el poder judicial se realiza cada día a las 9:00 AM.
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">Aviso de nuevos movimientos</div>
+              <div class="notif-desc">Recibirás actualización de movimientos de tus causas desde el poder judicial</div>
+            </div>
+            <div class="notif-controls">
+              <select class="time-select"><option>10:00</option><option>09:00</option><option>11:00</option></select>
+              <div class="toggle"></div>
+            </div>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">Aviso de nuevos eventos</div>
+              <div class="notif-desc">Recibirás actualización de eventos de tus causas desde el poder judicial</div>
+            </div>
+            <div class="notif-controls">
+              <select class="time-select"><option>10:00</option></select>
+              <div class="toggle"></div>
+            </div>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">Recordatorio de tareas por vencer</div>
+              <div class="notif-desc">Recibirás una lista de tareas que vencen el día siguiente y el mismo día</div>
+            </div>
+            <div class="notif-controls">
+              <select class="time-select"><option>09:00</option></select>
+              <div class="toggle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automation section (empty) -->
+      <div class="config-section" id="automation-section">
+        <div class="config-section-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/></svg>
+          <span class="config-section-title" style="color:#9CA3AF;">Automatizaciones</span>
+          <span style="font-size:11px;background:#F3F4F6;color:#9CA3AF;padding:2px 8px;border-radius:4px;margin-left:auto;">Próximamente</span>
+        </div>
+        <div class="config-section-body">
+          <div class="empty-workflows">
+            <div class="empty-icon">⚡</div>
+            <div class="empty-title">Sin automatizaciones configuradas</div>
+            <div class="empty-desc">CaseTracking envía notificaciones cuando hay movimientos. Las acciones sobre esos movimientos las define el abogado manualmente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIA Panel -->
+<div class="lia-panel" id="lia-panel">
+  <div class="lia-panel-header">
+    <div class="lia-pulse"></div>
+    <div>
+      <div class="lia-header-name">LIA Partner</div>
+      <div class="lia-header-sub">Legal Workflows · Automatización activa</div>
+    </div>
+    <div class="lia-close" onclick="closeLia()">×</div>
+  </div>
+  <div class="lia-panel-body" id="lia-body"></div>
+  <div class="lia-panel-input">
+    <input class="lia-input" placeholder="Configura o consulta tus workflows...">
+    <button class="lia-send">↑</button>
+  </div>
+</div>
+
+<div class="overlay-backdrop" id="backdrop"></div>
+<div class="spotlight hidden" id="spotlight"></div>
+<div class="tooltip hidden" id="tooltip">
+  <div class="tooltip-header">
+    <div class="tooltip-lia-dot"></div>
+    <div>
+      <div class="tooltip-step-label" id="tt-step-label"></div>
+      <div class="tooltip-title" id="tt-title"></div>
+    </div>
+  </div>
+  <div class="tooltip-body">
+    <div class="tooltip-text" id="tt-text"></div>
+    <div class="tooltip-footer">
+      <div class="tooltip-dots" id="tt-dots"></div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="tooltip-btn skip" id="tt-skip" onclick="endTour()">Saltar</button>
+        <button class="tooltip-btn primary" onclick="nextStep()"><span id="tt-btn-text">Siguiente</span> <span id="tt-btn-icon">→</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="tour-trigger" id="tour-trigger" onclick="startTour()">⚡ Ver Legal Workflows</button>
+<button class="restart-btn" id="restart-btn" onclick="restartTour()">↺ Reiniciar demo</button>
+
+<script>
+const steps = [
+  {
+    target: 'notif-section', padding: 8,
+    title: 'CTF notifica. Nada más.',
+    text: `CTF tiene un sistema de notificaciones sólido. Te avisa a las 10:00 AM si hubo movimientos nuevos. Te recuerda tareas que vencen.<br><br>Eso es todo. <span class="highlight">La decisión de qué hacer con cada notificación sigue siendo tuya.</span><br><br>Con 30 causas activas, eso son 30 decisiones manuales cada mañana.`,
+    position: 'bottom'
+  },
+  {
+    target: 'automation-section', padding: 8,
+    title: 'El vacío de automatización',
+    text: `CTF no tiene un motor de automatización. No puede decir: <em>"si llega un movimiento de tipo X, hacer Y automáticamente."</em><br><br>Esa lógica vive en la cabeza del abogado. Si el abogado no está, o está ocupado, <span class="highlight">el flujo se detiene.</span>`,
+    position: 'bottom'
+  },
+  {
+    target: null, padding: 0, position: 'center',
+    title: 'LIA: Gmail + Zapier para el derecho',
+    text: `Gmail tiene reglas: si llega email de X → mover a carpeta Y. Zapier conecta apps: si pasa A → hacer B en C.<br><br>LIA trae ese paradigma al flujo procesal legal. <strong>La firma define las reglas una vez. LIA las ejecuta siempre.</strong>`,
+  },
+  {
+    target: 'lia-spotlight', padding: 8,
+    title: 'Workflows que trabajan solos',
+    text: `Cada workflow tiene tres partes: <span class="purple">trigger</span> (qué lo activa), condición (cuándo aplica), y <span class="good">acción</span> (qué hace LIA).<br><br>Una firma que configura sus workflows en LIA no puede migrar a otro producto sin perder toda su automatización. <strong>El lock-in más valioso que existe.</strong>`,
+    position: 'left'
+  }
+];
+
+const liaMessages = [
+  { delay: 600, html: `Estos son los <strong>3 workflows activos</strong> de tu firma. Se ejecutan automáticamente cuando se cumplen las condiciones:` },
+  {
+    delay: 2000, html: `
+    <div class="wf-card">
+      <div class="wf-card-header"><div class="wf-card-title">🔴 Workflow: Resolución urgente</div><div class="wf-active-badge">● Activo</div></div>
+      <div class="wf-block"><span class="wf-tag trigger">Trigger</span><div class="wf-text">Nuevo movimiento tipo <strong>"Resolución"</strong> en cualquier causa civil o laboral</div></div>
+      <div class="wf-block"><span class="wf-tag condition">Si</span><div class="wf-text">Requiere respuesta en ≤ 5 días hábiles según CPC</div></div>
+      <div class="wf-block"><span class="wf-tag action">Hacer</span><div class="wf-text">Crear tarea en CTF + notificar abogado responsable + generar borrador</div></div>
+    </div>
+    <div class="wf-card">
+      <div class="wf-card-header"><div class="wf-card-title">🟡 Workflow: Causa estancada</div><div class="wf-active-badge">● Activo</div></div>
+      <div class="wf-block"><span class="wf-tag trigger">Trigger</span><div class="wf-text">Causa sin movimientos por <strong>más de 30 días</strong></div></div>
+      <div class="wf-block"><span class="wf-tag condition">Si</span><div class="wf-text">Etapa activa (no terminada ni archivada)</div></div>
+      <div class="wf-block"><span class="wf-tag action">Hacer</span><div class="wf-text">Alerta al socio con análisis de riesgo de la causa</div></div>
+    </div>
+    <div class="wf-card">
+      <div class="wf-card-header"><div class="wf-card-title">🟢 Workflow: Plazo fatal</div><div class="wf-active-badge">● Activo</div></div>
+      <div class="wf-block"><span class="wf-tag trigger">Trigger</span><div class="wf-text">Plazo fatal en <strong>menos de 48 horas</strong></div></div>
+      <div class="wf-block"><span class="wf-tag condition">Si</span><div class="wf-text">Tarea sin estado "Completada"</div></div>
+      <div class="wf-block"><span class="wf-tag action">Hacer</span><div class="wf-text">Escalar a todos los abogados asignados a la causa</div></div>
+    </div>`
+  },
+  {
+    delay: 1200, html: `
+    <div class="wf-summary">
+      <strong>Esta semana, LIA ejecutó:</strong>
+      4 tareas creadas automáticamente · 2 borradores generados · 1 alerta de socio enviada · 0 plazos vencidos
+    </div>
+    <div style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#ECFDF5;border:1px solid rgba(0,200,150,0.4);border-radius:7px;font-size:12px;font-weight:500;color:#065F46;cursor:pointer;">
+      ⚡ Crear nuevo workflow
+    </div>`
+  }
+];
+
+let currentStep = -1;
+function getEl(id) { return document.getElementById(id); }
+
+function positionSpotlight(targetId, pad=8) {
+  const spot = getEl('spotlight');
+  if (!targetId) { spot.classList.add('hidden'); return; }
+  if (targetId === 'lia-spotlight') {
+    const r = getEl('lia-panel').getBoundingClientRect();
+    Object.assign(spot.style, {left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px'});
+    spot.classList.remove('hidden'); return;
+  }
+  const el = getEl(targetId); if (!el) { spot.classList.add('hidden'); return; }
+  const r = el.getBoundingClientRect();
+  Object.assign(spot.style, {left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px'});
+  spot.classList.remove('hidden');
+}
+
+function positionTooltip(targetId, position) {
+  const tt = getEl('tooltip');
+  tt.classList.remove('hidden');
+  if (position === 'center' || !targetId) { tt.style.left='50%'; tt.style.top='50%'; tt.style.transform='translate(-50%,-50%)'; return; }
+  requestAnimationFrame(() => {
+    const ttW=tt.offsetWidth, ttH=tt.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
+    tt.style.transform='';
+    if (targetId==='lia-spotlight') {
+      const r=getEl('lia-panel').getBoundingClientRect();
+      tt.style.left=Math.max(8,r.left-ttW-20)+'px'; tt.style.top=Math.max(60,Math.min(r.top+30,vh-ttH-16))+'px'; return;
+    }
+    const el=getEl(targetId); if (!el) return;
+    const r=el.getBoundingClientRect();
+    const fits={right:r.right+16+ttW<vw-8, left:r.left-16-ttW>8, bottom:r.bottom+12+ttH<vh-8, top:r.top-12-ttH>60};
+    let chosen=position; if (!fits[position]) { if(fits.bottom)chosen='bottom'; else if(fits.top)chosen='top'; else if(fits.left)chosen='left'; else chosen='center'; }
+    const cx=Math.min(Math.max(r.left+r.width/2-ttW/2,8),vw-ttW-8);
+    if(chosen==='right'){tt.style.left=(r.right+16)+'px';tt.style.top=Math.min(Math.max(r.top,60),vh-ttH-8)+'px';}
+    else if(chosen==='left'){tt.style.left=Math.max(8,r.left-ttW-16)+'px';tt.style.top=Math.min(Math.max(r.top,60),vh-ttH-8)+'px';}
+    else if(chosen==='bottom'){tt.style.left=cx+'px';tt.style.top=(r.bottom+12)+'px';}
+    else if(chosen==='top'){tt.style.left=cx+'px';tt.style.top=Math.max(60,r.top-ttH-12)+'px';}
+    else{tt.style.left='50%';tt.style.top='50%';tt.style.transform='translate(-50%,-50%)';}
+  });
+}
+
+function updateDots() {
+  getEl('tt-dots').innerHTML=steps.map((_,i)=>`<div class="tooltip-dot ${i===currentStep?'active':i<currentStep?'done':''}"></div>`).join('');
+}
+function showStep(i) {
+  const s=steps[i];
+  getEl('tt-step-label').textContent=`Paso ${i+1} de ${steps.length}`;
+  getEl('tt-title').textContent=s.title;
+  getEl('tt-text').innerHTML=s.text;
+  getEl('tt-btn-text').textContent=i===steps.length-1?'Entendido':'Siguiente';
+  getEl('tt-btn-icon').textContent=i===steps.length-1?'✓':'→';
+  updateDots(); positionSpotlight(s.target,s.padding); positionTooltip(s.target,s.position);
+}
+function startTour() {
+  currentStep=0; getEl('backdrop').classList.add('active'); getEl('tour-trigger').classList.add('hidden'); getEl('tt-skip').style.display='';
+  document.querySelector('.ct-content').scrollTop=0; showStep(0);
+}
+function nextStep() {
+  currentStep++;
+  if (currentStep>=steps.length){endTour();return;}
+  if (currentStep===2){getEl('tooltip').classList.add('hidden');getEl('spotlight').classList.add('hidden');openLiaPanel(()=>showStep(2));return;}
+  if (currentStep===3){getEl('tt-skip').style.display='none';showStep(3);return;}
+  showStep(currentStep);
+}
+function openLiaPanel(cb) {
+  const body=getEl('lia-body'); body.innerHTML=''; getEl('lia-panel').classList.add('open');
+  setTimeout(()=>addMsg(0,()=>addMsg(1,()=>addMsg(2,()=>{if(cb)setTimeout(cb,400);}))),400);
+}
+function addMsg(idx,cb) {
+  const m=liaMessages[idx], body=getEl('lia-body');
+  const w=document.createElement('div'); w.className='chat-msg';
+  w.innerHTML=idx===0?`<div class="chat-msg-label">LIA</div><div class="chat-bubble lia-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`:`<div class="chat-bubble lia-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  body.appendChild(w); body.scrollTop=body.scrollHeight;
+  setTimeout(()=>{w.querySelector('.lia-bubble').innerHTML=m.html;body.scrollTop=body.scrollHeight;if(cb)setTimeout(cb,300);},m.delay);
+}
+function endTour(){getEl('backdrop').classList.remove('active');getEl('spotlight').classList.add('hidden');getEl('tooltip').classList.add('hidden');getEl('restart-btn').style.display='block';currentStep=-1;}
+function closeLia(){getEl('lia-panel').classList.remove('open');endTour();}
+function restartTour(){getEl('lia-panel').classList.remove('open');getEl('lia-body').innerHTML='';getEl('restart-btn').style.display='none';getEl('tour-trigger').classList.remove('hidden');}
+window.addEventListener('resize',()=>{if(currentStep>=0){const s=steps[currentStep];positionSpotlight(s.target,s.padding);positionTooltip(s.target,s.position);}});
+</script>
+</body>
+</html>
